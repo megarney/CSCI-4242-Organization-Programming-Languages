@@ -1,5 +1,3 @@
-# cd to right directory - C:\Users\Meg\Documents\GitHub\CSCI-4242-Organization-Programming-Languages\creatingfile.nim
-# run with nim c -r creatingfile.nim
 
 import std/random
 import std/strutils
@@ -8,44 +6,28 @@ import times, os
 
 let start = epochTime()
 
-# Call randomize() once to initialize the default random number generator
-# If this is not called, the same results will occur every time
 randomize()
 
 var
     randomFile: string
     min, max, mean, median: int
-    # nim's sequence is similar to an arraylist
     randomSeq, mode: seq[int]
     sd: float
 
-# proc refers to a procedure
 proc writeRandomNumbers() = 
-    # Create and open a file
     writeFile("randomNumbers.txt", "")
-    # fmwrite constant specifies that we are opening the file for writing
     let f = open("randomNumbers.txt", fmwrite)
-    # defer is an equivalent for a try..catch statement
-    # will also close file object when you are done with it
     defer: f.close()
 
-    # Write 100,000 random numbers from
     for i in countup(1,100000):
-        # $() is a method of converting an int to a string
-        # rand([number]) will return a random int between 0 and [number]
         f.writeLine(rand(100000))
 writeRandomNumbers()
 
-# read in the random numbers generated into the sequence
 proc readRandomNumbers() =
     for line in lines "randomNumbers.txt":
         randomSeq.add(parseInt(line))
 readRandomNumbers()
 
-# loop and until function as a do while loop, because the tradition
-# do while loop does not exist in Nim. Loop defines the do and until
-# defines the condition(s) that must occur in order for the loop to 
-# break
 template loop(body: untyped): typed = 
     while true:
         body
@@ -53,7 +35,6 @@ template loop(body: untyped): typed =
 template until(cond: typed): typed = 
     if cond: break
 
-# Insertion Sort
 proc sortSeq() =
     for i in countup(1, randomSeq.len-1):
         var j = i
@@ -88,7 +69,6 @@ proc findMeanMode() =
                 current = 2
             if current > count:
                 count = current
-                # sequence = @[] clears the sequence
                 mode = @[]
                 mode.add(randomSeq[i])
             elif current == count:
