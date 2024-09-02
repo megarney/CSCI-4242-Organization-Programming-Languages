@@ -3,6 +3,10 @@
 
 import std/random
 import std/strutils
+import std/math
+import times, os
+
+let start = epochTime()
 
 # Call randomize() once to initialize the default random number generator
 # If this is not called, the same results will occur every time
@@ -10,7 +14,10 @@ randomize()
 
 var
     randomFile: string
-    min, max, mean, median, mode, sd: int
+    min, max, mean, median: int
+    # nim's sequence is similar to an arraylist
+    randomSeq, mode: seq[int]
+    sd: float
 
 # proc refers to a procedure
 proc writeRandomNumbers() = 
@@ -23,14 +30,11 @@ proc writeRandomNumbers() =
     defer: f.close()
 
     # Write 100,000 random numbers from
-    for i in countup(1,10):
+    for i in countup(1,100000):
         # $() is a method of converting an int to a string
         # rand([number]) will return a random int between 0 and [number]
         f.writeLine(rand(100000))
 writeRandomNumbers()
-
-# nim's sequence is similar to an arraylist
-var randomSeq: seq[int]
 
 # read in the random numbers generated into the sequence
 proc readRandomNumbers() =
@@ -64,31 +68,57 @@ sortSeq()
 
 proc findMin() =
     min = randomSeq[0]
-    echo "Min:" 
-    echo min
+    echo "Min: ", min
 findMin()
 
 proc findMax() = 
     max = randomSeq[randomSeq.len-1]
-    echo "Max:" 
-    echo max
+    echo "Max: ", max
 findMax()
 
-proc findMean() = 
+proc findMeanMode() = 
+    var count = 1
+    var current = 1
+    mode.add(randomSeq[0])
     for i in countup(0, randomSeq.len-1):
+        if i > 0 and randomSeq[i] == randomSeq[i-1]:
+            if randomSeq[i] == randomSeq[i-current]:
+                current = current+1
+            else:
+                current = 2
+            if current > count:
+                count = current
+                # sequence = @[] clears the sequence
+                mode = @[]
+                mode.add(randomSeq[i])
+            elif current == count:
+                mode.add(randomSeq[i])
+        elif i > 0 and current == 1:
+            mode.add(randomSeq[i])
         mean += randomSeq[i]
     mean = mean div randomSeq.len
-    echo "Mean:"
-    echo mean
-findMean()
-
-echo randomSeq
+    echo "Mean:", mean
+    echo "Mode:", mode
+findMeanMode()
 
 proc findMedian() = 
     if(randomSeq.len mod 2 == 0):
         median = (randomSeq[randomSeq.len div 2] + randomSeq[(randomSeq.len div 2) - 1]) div 2
     else:
         median = randomSeq[(randomSeq.len div 2)]
-    echo "Median:"
-    echo median
+    echo "Median:", median
 findMedian()
+
+proc findStandardDeviation() = 
+    var current = 0
+    sd = 0
+    for i in countup(0, randomSeq.len-1):
+        current = (randomSeq[i] - mean)
+        sd = sd + (current.float*current.float)
+    sd = sd / (randomSeq.len).float
+    sd = sqrt(sd)
+    echo "Standard Deviation:", sd.formatFloat(format = ffDecimal, precision = 3)
+findStandardDeviation()
+
+let fin = epochTime() - start
+echo "Time: ", fin.formatFloat(format = ffDecimal, precision = 3), "s"
